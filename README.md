@@ -74,6 +74,20 @@ If any settings are missing or left empty, the corresponding checks are skipped.
 
 It is also possible to hard-code the values in Settings.cs. These are overwritten by any values present in the file on the FTP server.
 
+**FTP server**
+
+The FTP server should contain the files referenced to in modsync.xml, the file itself, and the mod directory to keep in sync. For the settings listed above the file structure would be:
+
+```
+mods/
+modsync.xml
+jre-7u75-windows-i586-iftw.exe
+MinecraftLauncher.exe
+forge-1.7.10-10.13.0.1207-installer.jar
+```
+
+Write access is only needed for the command line option “updateserver” to work, and can be omitted otherwise.
+
 **Compiling**
 
 Although you could use the binary attached, I encourage everyone to compile your own.
