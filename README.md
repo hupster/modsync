@@ -90,7 +90,7 @@ Write access is only needed for the command line option “updateserver” to wo
 
 **Compiling**
 
-Although you could use the binary attached, I encourage everyone to compile your own.
+Although you could use the binary from here, I encourage everyone to compile your own.
 You could do so by installing Visual Studio, I used version [2008 sp1](http://download.microsoft.com/download/E/8/E/E8EEB394-7F42-4963-A2D8-29559B738298/VS2008ExpressWithSP1ENUX1504728.iso), newer should work too.
 - Open the project by clicking modsync.csproj
 - The reference to edtFTPnet.dll will be missing, get it at EnterpriseDT: download the zip and copy the edtFTPnet.dll from the bin folder to the modsync project folder
@@ -101,7 +101,7 @@ You could do so by installing Visual Studio, I used version [2008 sp1](http://do
 The application has a single dependency outside of .NET 3.5 SP1: [edtFTPnet](https://enterprisedt.com/products/edtftpnet/) from EnterpriseDT. The library is included in the program as an embedded resource, allowing the executable to be run by itself. There are therefore two options for deployment:
 
 1. Distribute the executable
-Use the attached file or, preferably, build the application yourself and just copy modsync.exe from the folder bin\Release.
+Use the included binary or, preferably, build the application yourself and just copy modsync.exe from the folder bin\Release.
 
 2. Deployment through clickonce
 By publishing the application and putting it on a web server, it can perform auto-updates. Also the generated installer can install the .NET framework dependency.
