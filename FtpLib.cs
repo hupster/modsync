@@ -110,7 +110,10 @@ namespace modsync
                     m.LocalFile = LocalFile;
                     m.ModifiedTime = fi.LastWriteTime;
                     m.RemoteFile = LocalFile.Replace(localFolder, remoteFolder).Replace('\\', '/');
-                    BytesTotal += fi.Length;
+                    if (settings.WhenMissingRemote == FTPAction.Copy)
+                    {
+                        BytesTotal += fi.Length;
+                    }
                     mods.Add(m);
                     ShowMod(m);
                 }
@@ -180,6 +183,7 @@ namespace modsync
                 {
                     FTPSyncModification m = new FTPSyncModification();
                     AddModification = false;
+                    DateTime RemoteStamp = TimeZone.CurrentTimeZone.ToLocalTime(CurrentFileOrDirectory.LastModified);
 
                     m.LocalFile = Path.Combine(localFolder, CurrentFileOrDirectory.Name);
                     m.RemoteFile = string.Format("{0}/{1}", remoteFolder, CurrentFileOrDirectory.Name);
@@ -191,31 +195,54 @@ namespace modsync
                         {
                             AddModification = true;
                             m.Exists = false;
-                            m.ModifiedTime = CurrentFileOrDirectory.LastModified;
+                            m.ModifiedTime = RemoteStamp;
                             m.Upload = false;
                             m.Action = settings.WhenMissingLocal;
-                            BytesTotal += CurrentFileOrDirectory.Size;
+                            if (settings.WhenMissingLocal == FTPAction.Copy)
+                            {
+                                BytesTotal += CurrentFileOrDirectory.Size;
+                            }
                         }
                     }
                     else
                     {
                         // read file info
                         fi = new FileInfo(m.LocalFile);
+                        DateTime LocalStamp = TimeZone.CurrentTimeZone.ToLocalTime(fi.LastWriteTime);
 
                         // check file size
-                        //if (CurrentFileOrDirectory.Size != fi.Length)
-                        //{
-                        //    AddModification = true;
-                        //    m.Type = "Updated";
-                        //    m.Upload = (CurrentFileOrDirectory.Size < fi.Length);
-                        //}
-
-                        // check modification time
-                        DateTime LocalStamp = TimeZone.CurrentTimeZone.ToLocalTime(fi.LastWriteTime);
-                        if (CurrentFileOrDirectory.LastModified != LocalStamp)
+                        if (CurrentFileOrDirectory.Size != fi.Length)
                         {
                             m.Exists = true;
-                            if (CurrentFileOrDirectory.LastModified < LocalStamp)
+                            if (CurrentFileOrDirectory.Size < fi.Length)
+                            {
+                                if (settings.WhenLargerLocal == FTPAction.Copy)
+                                {
+                                    AddModification = true;
+                                    m.ModifiedTime = LocalStamp;
+                                    m.Upload = true;
+                                    m.Action = settings.WhenLargerLocal;
+                                    BytesTotal += fi.Length;
+                                }
+                            }
+                            else
+                            {
+                                if (settings.WhenLargerRemote == FTPAction.Copy)
+                                {
+                                    AddModification = true;
+                                    m.ModifiedTime = RemoteStamp;
+                                    m.Upload = false;
+                                    m.Action = settings.WhenLargerRemote;
+                                    BytesTotal += CurrentFileOrDirectory.Size;
+                                }
+                            }
+                        }
+
+                        // check modification time
+                        if (RemoteStamp != LocalStamp)
+                        {
+                            m.Exists = true;
+                            if (RemoteStamp < LocalStamp)
                             {
                                 if (settings.WhenNewerLocal == FTPAction.Copy)
                                 {
@@ -231,7 +258,7 @@ namespace modsync
                                 if (settings.WhenNewerRemote == FTPAction.Copy)
                                 {
                                     AddModification = true;
-                                    m.ModifiedTime = CurrentFileOrDirectory.LastModified;
+                                    m.ModifiedTime = RemoteStamp;
                                     m.Upload = false;
                                     m.Action = settings.WhenNewerRemote;
                                     BytesTotal += CurrentFileOrDirectory.Size;
@@ -254,26 +281,29 @@ namespace modsync
 
         private void ShowMod(FTPSyncModification mod)
         {
+            string LocalFile = mod.LocalFile.Replace(Locations.LocalFolderName_Minecraft + "\\", "");
+            string RemoteFile = mod.RemoteFile.Replace(Config.ftpsettings.FtpServerFolder + "/", "");
+            
             switch (mod.Action)
             {
                 case FTPAction.Copy:
                     if (mod.Upload)
                     {
-                        ShowStatus(1, string.Format("--> {0} ({1} {2})", mod.LocalFile, (mod.Exists ? "Updated" : "Added"), mod.ModifiedTime.ToShortDateString()));
+                        ShowStatus(1, string.Format("--> {0} ({1} {2})", LocalFile, (mod.Exists ? "Updated" : "Added"), mod.ModifiedTime.ToShortDateString()));
                     }
                     else
                     {
-                        ShowStatus(1, string.Format("<-- {0} ({1} {2})", mod.RemoteFile, (mod.Exists ? "Updated" : "Added"), mod.ModifiedTime.ToShortDateString()));
+                        ShowStatus(1, string.Format("<-- {0} ({1} {2})", RemoteFile, (mod.Exists ? "Updated" : "Added"), mod.ModifiedTime.ToShortDateString()));
                     }
                     break;
                 case FTPAction.Delete:
                     if (mod.Upload)
                     {
-                        ShowStatus(1, string.Format("del local {0}", mod.LocalFile));
+                        ShowStatus(1, string.Format(" X {0}", LocalFile));
                     }
                     else
                     {
-                        ShowStatus(1, string.Format("del remote {0}", mod.RemoteFile));
+                        ShowStatus(1, string.Format(" X {0}", RemoteFile));
                     }
                     break;
             }
@@ -525,5 +555,9 @@ namespace modsync
         public FTPAction WhenNewerRemote;
         // what to do when newer local
         public FTPAction WhenNewerLocal;
+        // what to do when larger remote
+        public FTPAction WhenLargerRemote;
+        // what to do when larger local
+        public FTPAction WhenLargerLocal;
     }
 }

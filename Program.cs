@@ -24,8 +24,8 @@ namespace modsync
 
         static void Main(string[] args)
         {
-            // check for updates if deployed
-            if (!Update.AutoUpdate())
+            // check for clickonce updates
+            if (Update.ClickOnceUpdate())
             {
                 return;
             }
@@ -78,15 +78,15 @@ namespace modsync
             // update config from server
             Config.FtpUpdate(ref ftpcon);
 
+            // check for executable updates
+            Update.ExecutableUpdate(ref ftpcon);
+
             // handle push
             if (push)
             {
                 Mods.Push(ref ftp);
                 Exit(false);
             }
-
-            // fix shortcut
-            Update.ReplaceShortCut();
 
             // check for java
             Java.Check(ref ftpcon);
@@ -97,7 +97,7 @@ namespace modsync
             // check forge
             Forge.Check(ref ftpcon);
 
-            // sync mods
+            // sync folders
             Mods.Pull(ref ftp);
 
             // update servers file

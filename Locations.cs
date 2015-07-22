@@ -12,7 +12,6 @@ namespace modsync
         public static string LocalFolderName_Desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         public static string LocalFolderName_Roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         public static string LocalFolderName_Minecraft = LocalFolderName_Roaming + "\\.minecraft";
-        public static string LocalFolderName_Mods = LocalFolderName_Minecraft + "\\mods";
         public static string LocalFolderName_Versions = LocalFolderName_Minecraft + "\\versions";
         public static string LocalFolderName_Launcher = LocalFolderName_Minecraft + "\\minecraft launcher";
         public static string Launcher_Install = ProgramFilesx86() + "\\Minecraft\\MinecraftLauncher.exe";

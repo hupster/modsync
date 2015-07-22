@@ -10,62 +10,98 @@ namespace modsync
         public static void Pull(ref FtpLib ftp)
         {
             // return if disabled
-            if (Config.settings.ModsSyncFolder == "")
+            if (Config.settings.SyncFolders == "")
             {
                 return;
             }
-            // update local with server mods
-            Console.WriteLine(Strings.Get("ModsPulling"));
-            FTPSyncSettings ftpsyncsettings = new FTPSyncSettings();
-            ftpsyncsettings.Recurse = false;
-            ftpsyncsettings.WhenMissingLocal = FTPAction.Copy;
-            ftpsyncsettings.WhenMissingRemote = FTPAction.Delete;
-            ftpsyncsettings.WhenNewerLocal = FTPAction.Noop;
-            ftpsyncsettings.WhenNewerRemote = FTPAction.Noop;
-            Sync(ref ftp, ftpsyncsettings);
+
+            // download changes on server to local
+            foreach (string folder in Config.settings.SyncFolders.Split(','))
+            {
+                Console.WriteLine(Strings.Get("SyncDown") + " " + folder + " ... ");
+                FTPSyncSettings ftpsyncsettings = new FTPSyncSettings();
+                if (folder == "config")
+                {
+                    // special case for config folder
+                    ftpsyncsettings.Recurse = false;
+                    ftpsyncsettings.WhenMissingLocal = FTPAction.Copy;
+                    ftpsyncsettings.WhenMissingRemote = FTPAction.Noop;
+                    ftpsyncsettings.WhenNewerLocal = FTPAction.Noop;
+                    ftpsyncsettings.WhenNewerRemote = FTPAction.Copy;
+                    ftpsyncsettings.WhenLargerLocal = FTPAction.Noop;
+                    ftpsyncsettings.WhenLargerRemote = FTPAction.Noop;
+                }
+                else
+                {
+                    // other folders
+                    ftpsyncsettings.Recurse = false;
+                    ftpsyncsettings.WhenMissingLocal = FTPAction.Copy;
+                    ftpsyncsettings.WhenMissingRemote = FTPAction.Delete;
+                    ftpsyncsettings.WhenNewerLocal = FTPAction.Noop;
+                    ftpsyncsettings.WhenNewerRemote = FTPAction.Noop;
+                    ftpsyncsettings.WhenLargerLocal = FTPAction.Noop;
+                    ftpsyncsettings.WhenLargerRemote = FTPAction.Noop;
+                }
+                Sync(ref ftp, folder, ftpsyncsettings);
+            }
         }
 
         public static void Push(ref FtpLib ftp)
         {
             // return if disabled
-            if (Config.settings.ModsSyncFolder == "")
+            if (Config.settings.SyncFolders == "")
             {
                 return;
             }
-            if (Config.settings.ModsSyncAllowPush != "true")
+            if (Config.settings.SyncAllowUpload != "true")
             {
-                Console.WriteLine(Strings.Get("ModsPushNotAllowed"));
+                Console.WriteLine(Strings.Get("SyncUpNotAllowed"));
                 Console.ReadKey();
                 return;
             }
 
-            // update server with local mods
-            Console.WriteLine(Strings.Get("ModsPushing"));
-            FTPSyncSettings ftpsyncsettings = new FTPSyncSettings();
-            ftpsyncsettings.Recurse = false;
-            ftpsyncsettings.WhenMissingLocal = FTPAction.Delete;
-            ftpsyncsettings.WhenMissingRemote = FTPAction.Copy;
-            ftpsyncsettings.WhenNewerLocal = FTPAction.Noop;
-            ftpsyncsettings.WhenNewerRemote = FTPAction.Noop;
-            Sync(ref ftp, ftpsyncsettings);
+            // upload changes in local folders to server
+            foreach (string folder in Config.settings.SyncFolders.Split(','))
+            {
+                Console.WriteLine(Strings.Get("SyncUp") + " " + folder + " ... ");
+                FTPSyncSettings ftpsyncsettings = new FTPSyncSettings();
+                if (folder == "config")
+                {
+                    // skip push for config folder
+                    continue;
+                }
+                else
+                {
+                    // other folders
+                    ftpsyncsettings.Recurse = false;
+                    ftpsyncsettings.WhenMissingLocal = FTPAction.Delete;
+                    ftpsyncsettings.WhenMissingRemote = FTPAction.Copy;
+                    ftpsyncsettings.WhenNewerLocal = FTPAction.Noop;
+                    ftpsyncsettings.WhenNewerRemote = FTPAction.Noop;
+                    ftpsyncsettings.WhenLargerLocal = FTPAction.Noop;
+                    ftpsyncsettings.WhenLargerRemote = FTPAction.Noop;
+                }
+                Sync(ref ftp, folder, ftpsyncsettings);
+            }
         }
 
-        static bool Sync(ref FtpLib ftp, FTPSyncSettings ftpsyncsettings)
+        static bool Sync(ref FtpLib ftp, string folder, FTPSyncSettings ftpsyncsettings)
         {
             try
             {
                 // make list of changes
-                List<FTPSyncModification> changes = ftp.CompareDirectory(Locations.LocalFolderName_Mods, Config.ftpsettings.FtpServerFolder + "/" + Config.settings.ModsSyncFolder, ftpsyncsettings);
+                string localFolder = Locations.LocalFolderName_Minecraft + "\\" + folder;
+                string remoteFolder = Config.ftpsettings.FtpServerFolder + "/" + folder;
+                List<FTPSyncModification> changes = ftp.CompareDirectory(localFolder, remoteFolder, ftpsyncsettings);
                 if (changes.Count > 0)
                 {
-                    Console.WriteLine(Strings.Get("ModsSyncing"));
+                    Console.WriteLine(Strings.Get("Syncing") + " " + folder + " ... ");
                     ftp.SynchronizeFiles(changes, false);
                 }
-                Console.WriteLine(Strings.Get("ModsOK"));
             }
             catch (Exception ex)
             {
-                Console.WriteLine(Strings.Get("ModsError") + ex.Message);
+                Console.WriteLine(Strings.Get("SyncError") + ex.Message);
                 Console.ReadKey();
                 return false;
             }

@@ -28,16 +28,16 @@ namespace modsync
      */
     public class Settings
     {
+        public string ToolVersion = "";
+        public string ToolDownloadFile = "";
         public string JavaVersion = "";
         public string JavaDownloadFile = "";
         public string MinecraftVersion = "";
         public string MinecraftDownloadFile = "";
         public string ForgeVersion = "";
         public string ForgeDownloadFile = "";
-        public string ModsSyncFolder = "";
-        public string ModsSyncAllowPush = "";
-        public string DesktopShortcutToRemove = "";
-        public string DesktopShortcutToCreate = "";
+        public string SyncFolders = "";
+        public string SyncAllowUpload = "";
         public string ServerName = "";
         public string ServerAddress = "";
     }

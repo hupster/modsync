@@ -6,16 +6,20 @@ using System.Deployment.Application;
 using System.IO;
 using System.Diagnostics;
 using System.Security.Policy;
+using System.Reflection;
+using EnterpriseDT.Net.Ftp;
 
 namespace modsync
 {
     static class Update
     {
-        public static bool AutoUpdate()
+        // updates deployed application using clickonce
+        public static bool ClickOnceUpdate()
         {
+            // return if not clickonce deployed
             if (!ApplicationDeployment.IsNetworkDeployed)
             {
-                return true;
+                return false;
             }
             
             try
@@ -29,7 +33,7 @@ namespace modsync
                     updateCheck.Update();
                     Console.WriteLine(Strings.Get("AutoUpdateDone"));
                     Console.ReadKey();
-                    return false;
+                    return true;
                 }
             }
             catch (Exception xcep)
@@ -46,54 +50,60 @@ namespace modsync
                     Console.ReadKey();
                 }
             }
-            return true;
+            return false;
         }
 
-        public static void ReplaceShortCut()
+        // updates single executable
+        public static void ExecutableUpdate(ref FTPConnection ftpcon)
         {
-            // replace shortcut to minecraft with shortcut to launcher
-            string RemoveLink = Locations.LocalFolderName_Desktop + "\\" + Config.settings.DesktopShortcutToRemove;
-            string CreateLink = Locations.LocalFolderName_Desktop + "\\" + Config.settings.DesktopShortcutToCreate;
-            if ((Config.settings.DesktopShortcutToCreate != "") && !File.Exists(CreateLink))
-            {
-                if (WriteAppRefFile(CreateLink))
-                {
-                    if ((Config.settings.DesktopShortcutToRemove != "") && File.Exists(RemoveLink))
-                    {
-                        File.Delete(RemoveLink);
-                    }
-                }
-            }
-        }
-
-        // write application reference
-        static bool WriteAppRefFile(string FileLocation)
-        {
+            // return if clickonce deployed
             if (ApplicationDeployment.IsNetworkDeployed)
             {
-                try
-                {
-                    // create the file
-                    StreamWriter sw = new StreamWriter(FileLocation, false, Encoding.Unicode);
-                    ApplicationSecurityInfo asi = new ApplicationSecurityInfo(AppDomain.CurrentDomain.ActivationContext);
+                return;
+            }
 
-                    // write additional parameters
-                    sw.Write(ApplicationDeployment.CurrentDeployment.UpdateLocation.ToString() + "#modsync.application, ");
-                    sw.Write("Culture=neutral, PublicKeyToken=");
-                    byte[] pk = asi.ApplicationId.PublicKeyToken;
-                    for (int i = 0; i < pk.GetLength(0); i++)
-                    {
-                        sw.Write("{0:x2}", pk[i]);
-                    }
-                    sw.Write(", processorArchitecture=" + asi.ApplicationId.ProcessorArchitecture);
-                    sw.Close();
-                    return true;
-                }
-                catch (Exception)
+            // return if disabled
+            if (Config.settings.ToolVersion == "")
+            {
+                return;
+            }
+
+            // get location and version
+            Assembly file = Assembly.GetExecutingAssembly();
+            string file_location = file.Location;
+            string file_version = FileVersionInfo.GetVersionInfo(file_location).FileVersion;
+
+            int curversion, newversion;
+            if (int.TryParse(file_version.Replace(".", ""), out curversion) && int.TryParse(Config.settings.ToolVersion.Replace(".", ""), out newversion))
+            {
+                // update if newer available
+                if (curversion < newversion)
                 {
+                    string LocalFile = Locations.LocalFolderName_Minecraft + "\\" + Config.settings.ToolDownloadFile;
+                    string RemoteFile = Config.ftpsettings.FtpServerFolder + "/" + Config.settings.ToolDownloadFile;
+                    try
+                    {
+                        // download new file
+                        Console.WriteLine(Strings.Get("AutoUpdate"));
+                        ftpcon.DownloadFile(LocalFile, RemoteFile);
+
+                        // start a process with a delayed file copy
+                        Process process = new Process();
+                        ProcessStartInfo startInfo = new ProcessStartInfo();
+                        startInfo.WindowStyle = ProcessWindowStyle.Normal;
+                        startInfo.FileName = "cmd.exe";
+                        startInfo.Arguments = "/C ping 127.0.0.1 -n 1 -w 5000 > nul & copy /Y " + LocalFile + " " + file_location + " & " + file_location;
+                        process.StartInfo = startInfo;
+                        process.Start();
+                        Program.Exit(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(Strings.Get("AutoUpdateError") + " " + ex.Message);
+                        Console.ReadKey();
+                    }
                 }
             }
-            return false;
         }
     }
 }
