@@ -14,11 +14,11 @@ In essence, the tool requires a link to a FTP server, containing a config file, 
 **Features**
 
 This is what the tool does, in approximately the same order.
-Note that any if the listed actions can be disabled by leaving the corresponding configuration setting empty.
+Note that any of the listed actions can be disabled by leaving the corresponding configuration setting empty.
 
 - Check for updates
 
-Checks for updates for the tool itself. If the version set by config key 'ToolVersion' is higher than the version running, then download the file set by 'ToolDownloadFile' from the FTP server and replace the running executable with it.
+Checks for updates of the tool itself. If the version set by config key 'ToolVersion' is higher than the version running, then download the file set by 'ToolDownloadFile' from the FTP server and replace the running executable with it. Make sure that the AssemblyFileVersion (set in Properties\AssemblyInfo.cs) matches 'ToolVersion'.
 
 - Check Java
 
@@ -38,9 +38,12 @@ All folders listed in the comma-separated list set by 'SyncFolders' are synced w
 Typical folders to sync are:
 
 config: containing mod config files
+
 mods: containing Forge mods
-resourcepacks: containing resource packs, selectable by Options\Resource Packs
-shaderpacks: containing shaders, for use with the GLSL Shaders Mod, selectable by Options\Shaders
+
+resourcepacks: containing resource packs, selectable in the game by Options\Resource Packs
+
+shaderpacks: containing shaders, for use with the GLSL Shaders Mod, selectable in the game by Options\Shaders
 
 The tool downloads any missing file, and removes any local file that is missing on the FTP server, showing progress and actions during sync.
 If the “config" folder is listed, it is synced with different settings: don't remove any local file, just download any file that is newer on the server, or missing locally. This allows updating specific mod setting files, to fix incompatibilities.
@@ -94,7 +97,7 @@ It is also possible to hard-code the values in Settings.cs. These are overwritte
 
 **FTP server**
 
-The FTP server should contain the files referenced to in modsync.xml, the config file itself, and the mod directory to keep in sync. For the settings listed above the file structure would be:
+The FTP server should contain the files referenced to in modsync.xml, the config file itself, and the directories to keep in sync. For the settings listed above the file structure would be:
 
 ```
 config/
@@ -112,7 +115,7 @@ Write access is only needed for the command line option “updateserver” to wo
 
 **Compiling**
 
-Although you could use the binary from here, I encourage everyone to compile your own, reviewing the source code.
+Although you could use the binary from [here](https://github.com/hupster/modsync/blob/master/bin/Release/modsync.exe?raw=true), I encourage everyone to compile your own, reviewing the source code.
 You could do so by installing Visual Studio, I used version [2008 sp1](http://download.microsoft.com/download/E/8/E/E8EEB394-7F42-4963-A2D8-29559B738298/VS2008ExpressWithSP1ENUX1504728.iso), newer should work too.
 - Open the project by clicking modsync.csproj
 - The reference to edtFTPnet.dll will be missing, get it at EnterpriseDT: download the zip and copy the edtFTPnet.dll from the bin folder to the modsync project folder
@@ -124,7 +127,7 @@ The application has a single dependency outside of .NET 3.5 SP1: [edtFTPnet](htt
 This library is included in the program as an embedded resource, allowing the executable to be run by itself.
 
 So just copy modsync.exe to the computers to become Minecraft clients. You can use the binary from [here](https://github.com/hupster/modsync/blob/master/bin/Release/modsync.exe?raw=true), or preferably, build the application yourself and just copy modsync.exe from the folder bin\Release.
-The binary available for download here does not include an FTP link, so will ask for the details on first start.
+The binary available for download does not include an FTP link, so will ask for the details on first start.
 
 **Disclaimer**
 
