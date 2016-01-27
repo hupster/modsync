@@ -118,6 +118,7 @@ namespace modsync
             catch (Exception ex)
             {
                 Console.WriteLine(Strings.Get("ConfigError") + ex.Message);
+                Console.WriteLine(Strings.Get("PressKey"));
                 Console.ReadKey();
             }
         }

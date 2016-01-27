@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using System.IO;
 using Microsoft.Win32;
 using EnterpriseDT.Net.Ftp;
 
@@ -22,27 +23,36 @@ namespace modsync
             RegistryKey subKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\JavaSoft\\Java Runtime Environment\\" + Config.settings.JavaVersion);
             if (subKey != null)
             {
-                Locations.Java = subKey.GetValue("JavaHome").ToString() + "\\bin\\javaw.exe";
+                Locations.Javaw = subKey.GetValue("JavaHome").ToString() + "\\bin\\javaw.exe";
+                Locations.Java = subKey.GetValue("JavaHome").ToString() + "\\bin\\java.exe";
                 Console.WriteLine(Strings.Get("JavaOK"));
                 return;
             }
             Console.WriteLine(Strings.Get("JavaNotFound") + Config.settings.JavaVersion);
 
-            string LocalFile = Locations.LocalFolderName_Desktop + "\\" + Config.settings.JavaDownloadFile;
+            string LocalFile = Locations.LocalFolderName_TempDir + "\\" + Config.settings.JavaDownloadFile;
             string RemoteFile = Config.ftpsettings.FtpServerFolder + "/" + Config.settings.JavaDownloadFile;
             try
             {
                 // download and install java
                 Console.WriteLine(Strings.Get("JavaDownload"));
+                File.Delete(LocalFile);
                 ftpcon.DownloadFile(LocalFile, RemoteFile);
                 Console.WriteLine(Strings.Get("JavaInstall"));
-                Console.ReadKey();
-                var process = Process.Start(LocalFile);
-                Program.Exit(false);
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = LocalFile;
+                psi.WorkingDirectory = Path.GetDirectoryName(LocalFile);
+                psi.Verb = "runas";
+                psi.Arguments = "/s";
+                psi.UseShellExecute = true;
+                var process = Process.Start(psi);
+                process.WaitForExit();
+                File.Delete(LocalFile);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(Strings.Get("JavaError") + ex.Message);
+                Console.WriteLine(Strings.Get("PressKey"));
                 Console.ReadKey();
             }
         }

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
-using System.Reflection;
 using System.Globalization;
 using System.Threading;
 using EnterpriseDT.Net.Ftp;
@@ -31,7 +30,7 @@ namespace modsync
             }
             
             // add embedded dll
-            RegisterEmbeddedResources();
+            Resources.RegisterEmbeddedResources();
             
             // start program
             MainLoad(args);
@@ -130,10 +129,10 @@ namespace modsync
                 {
                     jar = Locations.Launcher_Download_Jar;
                 }
-                if (File.Exists(Locations.Java) && (jar != ""))
+                if (File.Exists(Locations.Javaw) && (jar != ""))
                 {
                     ProcessStartInfo psi = new ProcessStartInfo();
-                    psi.FileName = Locations.Java;
+                    psi.FileName = Locations.Javaw;
                     psi.WorkingDirectory = Path.GetDirectoryName(jar);
                     psi.Arguments = "-cp \"" + jar + "\" net.minecraft.launcher.Main";
                     psi.UseShellExecute = false;
@@ -201,38 +200,6 @@ namespace modsync
                 return false;
             }
             return true;
-        }
-
-        #endregion
-
-        #region Misc
-
-        // load dll included as embedded resource
-        static void RegisterEmbeddedResources()
-        {
-            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-            {
-                try
-                {
-                    Assembly assembly = Assembly.GetExecutingAssembly();
-                    String resourceName = assembly.GetName().Name + "." + new AssemblyName(args.Name).Name + ".dll";
-                    using (var stream = assembly.GetManifestResourceStream(resourceName))
-                    {
-                        if (stream != null)
-                        {
-                            Byte[] assemblyData = new Byte[stream.Length];
-                            stream.Read(assemblyData, 0, assemblyData.Length);
-                            return Assembly.Load(assemblyData);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(Strings.Get("DllError") + ex.Message);
-                    Console.ReadKey();
-                }
-                return null;
-            };
         }
 
         #endregion

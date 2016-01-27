@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
+using System.Reflection;
 using EnterpriseDT.Net.Ftp;
 
 namespace modsync
@@ -18,77 +19,62 @@ namespace modsync
                 return;
             }
 
-            // create directories if missing
-            if (!Directory.Exists(Locations.LocalFolderName_Versions))
+            // check forge json file
+            if (File.Exists(Locations.LocalFolderName_Versions + "\\" + Config.settings.ForgeVersion + "\\" + Config.settings.ForgeVersion + ".json"))
             {
-                try
-                {
-                    Directory.CreateDirectory(Locations.LocalFolderName_Versions);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(Strings.Get("ForgeError") + ex.Message);
-                    Console.ReadKey();
-                    Program.Exit(true);
-                }
+                Console.WriteLine(Strings.Get("ForgeOK"));
+            }
+            else
+            {
+                Install(ref ftpcon);
             }
 
-            // check forge by checking installed versions
-            bool versionFound = false;
-            foreach (string path in Directory.GetDirectories(Locations.LocalFolderName_Versions))
-            {
-                string ver = path.Remove(0, Locations.LocalFolderName_Versions.Length + 1);
-                if (ver == Config.settings.ForgeVersion)
-                {
-                    UpdateProfile("Forge", Config.settings.ForgeVersion);
-                    Console.WriteLine(Strings.Get("ForgeOK"));
-                    return;
-                }
-                else if (ver == Config.settings.MinecraftVersion)
-                {
-                    versionFound = true;
-                }
-            }
-
-            // cannot install forge without game version and profile file present
-            // select game version in default profile to load it once 
-            if (!versionFound)
+            UpdateProfile("Forge", Config.settings.ForgeVersion);
+        }
+        
+        static void Install(ref FTPConnection ftpcon)
+        {
+            // create default profile if missing
+            if (!File.Exists(Locations.LauncherProfiles))
             {
                 UpdateProfile("(Default)", Config.settings.MinecraftVersion);
-                Console.WriteLine(Strings.Get("MinecraftStart"));
-                Console.ReadKey();
-                Program.Exit(true);
             }
-
-            string LocalFile = Locations.LocalFolderName_Desktop + "\\" + Config.settings.ForgeDownloadFile;
+            
+            string LocalFile = Locations.LocalFolderName_TempDir + "\\" + Config.settings.ForgeDownloadFile;
             string RemoteFile = Config.ftpsettings.FtpServerFolder + "/" + Config.settings.ForgeDownloadFile;
             try
             {
                 // download and install forge
                 Console.WriteLine(Strings.Get("ForgeDownload"));
+                File.Delete(LocalFile);
                 ftpcon.DownloadFile(LocalFile, RemoteFile);
                 Console.WriteLine(Strings.Get("ForgeInstall"));
-                Console.ReadKey();
+
                 if (File.Exists(Locations.Java))
                 {
+                    // extract wrapper class to invoke client install
+                    Resources.ExtractFile(Locations.LocalFolderName_TempDir, "ForgeInstallWrapper.class");
                     ProcessStartInfo psi = new ProcessStartInfo();
                     psi.FileName = Locations.Java;
                     psi.WorkingDirectory = Path.GetDirectoryName(LocalFile);
-                    psi.Arguments = "-jar \"" + LocalFile + "\"";
+                    psi.Arguments = "-cp \"" + Locations.LocalFolderName_TempDir + "\" ForgeInstallWrapper \"" + Config.settings.ForgeDownloadFile + "\" \"" + Locations.LocalFolderName_Minecraft + "\"";
                     psi.UseShellExecute = false;
-                    Process.Start(psi);
+                    var process = Process.Start(psi);
+                    process.WaitForExit();
+                    File.Delete(LocalFile);
+                    File.Delete(Locations.LocalFolderName_TempDir + "\\" + "ForgeInstallWrapper.class");
                 }
                 else
                 {
                     Process.Start(LocalFile);
+                    // exit without starting game
+                    Program.Exit(false);
                 }
-
-                // exit without starting game
-                Program.Exit(false);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(Strings.Get("ForgeError") + ex.Message);
+                Console.WriteLine(Strings.Get("PressKey"));
                 Console.ReadKey();
                 Program.Exit(true);
             }
@@ -119,7 +105,10 @@ namespace modsync
                 CheckExistingProfile(ref file, ref write, profile);
                 CheckSelectedProfile(ref file, ref write, profile);
                 CheckProfileKey(ref file, ref write, profile, "lastVersionId", version, Strings.Get("ProfileGameVersion"));
-                CheckProfileKey(ref file, ref write, profile, "javaDir", Locations.Java.Replace("\\", "\\\\"), Strings.Get("ProfileJavaVersion"));
+                if (File.Exists(Locations.Javaw))
+                {
+                    CheckProfileKey(ref file, ref write, profile, "javaDir", Locations.Javaw.Replace("\\", "\\\\"), Strings.Get("ProfileJavaVersion"));
+                }
 
                 if (write)
                 {
@@ -133,6 +122,7 @@ namespace modsync
             catch (Exception)
             {
                 Console.WriteLine(Strings.Get("ProfileError") + version);
+                Console.WriteLine(Strings.Get("PressKey"));
                 Console.ReadKey();
                 Program.Exit(true);
             }

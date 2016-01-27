@@ -34,7 +34,7 @@
     <ProductName>Minecraft Mod Sync</ProductName>
     <PublisherName>hupster</PublisherName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationRevision>7</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -84,6 +84,7 @@
     <Compile Include="Locations.cs" />
     <Compile Include="Minecraft.cs" />
     <Compile Include="Mods.cs" />
+    <Compile Include="Resources.cs" />
     <Compile Include="Servers.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Strings.cs" />
@@ -94,6 +95,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="edtFTPnet.dll" />
+    <EmbeddedResource Include="ForgeInstallWrapper.class" />
     <Content Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -129,7 +131,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="modsync_TemporaryKey.pfx" />
     <None Include="Properties\app.manifest" />
   </ItemGroup>
   <ItemGroup>

@@ -1,15 +1,15 @@
 # modsync
 Minecraft Mod Sync tool
 
-Greetings Minecrafters!
+Modsync is a small tool that can:
+- fully install Minecraft using configurable settings and installers, without user intervention and with very few dependencies
+- keep the installation in sync with the configured server, hosting the mods, resourcepacks and version settings
 
-I was maintaining a Minecraft server for a bunch of kids, and wanted to expand it with a few mods. Now I didn't like the idea of me going around with a USB stick installing the mods on all of the computers, every time I would add a mod. And I was surprised to find that there seems to be no easy tool available to do this automatically.
-
-So I've written a little tool that can be used on every computer, as a kind of Minecraft starter. The tool checks a few things, syncs some directories with the server, and then starts Minecraft. The things to check and directories to sync are configurable from the server. When all checks are enabled, the tool will install a modded Minecraft client complete with resourcepacks and shaderpacks on any Windows computer with just a few clicks.
+It can be used as a Minecraft pre-launcher. It will install everything required, and then start the Minecraft launcher. The installers to use and directories to sync are configurable from the server. When all checks are enabled, the tool can install Java, Minecraft with Forge complete with mods, resourcepacks and shaderpacks, without user intervention. Once installed, changing any of the versions in the config file of the server will result in an automated re-install at clients when they run the tool.
 
 Now there is the security risk of having you Minecraft directory accessed by the tool. That's why I provide the source code on Github, and encourage everyone to compile your own version, and share it with users that trust you.
 
-In essence, the tool requires a link to a FTP server, containing a config file, the directory with the mods to keep in sync, and installers to use when stuff is missing. The tool only approaches the configured FTP server, and no other sites or locations. Local file access is limited to the Minecraft directory, an optional launcher in program files, and an optional desktop shortcut. It will only remove or overwrite files in the directories listed in config file. So the person in control of the FTP server, has full control of the Minecraft installation at the clients.
+In essence, the tool requires a link to a FTP server, containing a config file, the directory with the mods to keep in sync, and installers to use when stuff is missing. The tool only approaches the configured FTP server, and no other sites or locations. Local file access is limited to the Minecraft directory, an optional launcher in program files. It will only remove or overwrite files in the directories listed in config file. So the person in control of the FTP server, has full control of the Minecraft installation at the clients. The tool does not require Administator rights, however the Java installer does.
 
 **Features**
 
@@ -30,7 +30,7 @@ Checks presence of a Minecraft launcher in either Program Files (x86)\Minecraft 
 
 - Check Forge
 
-Checks if 'ForgeVersion' is installed. If not, download and execute 'ForgeDownloadFile'. Updates launcher profile to use 'MinecraftVersion' before Forge is installed, so it will be downloaded by the installer. Updates launcher profile to use 'ForgeVersion' after Forge is installed. This mechanism allows for pushing Forge updates by updating the settings. Make sure that 'ForgeDownloadFile' does install 'ForgeVersion'. It can be the .exe or .jar you can get at [Forge](http://files.minecraftforge.net/minecraftforge/).
+Checks if 'ForgeVersion' is installed (use the version shown below at Settings or newer). If not, create default profile for 'MinecraftVersion' if required, download and install 'ForgeDownloadFile', and update launcher profile to use 'ForgeVersion'. Make sure that 'ForgeDownloadFile' does install 'ForgeVersion'. Use the .jar installer from [Forge](http://files.minecraftforge.net/minecraftforge/).
 
 - Sync Folders
 
@@ -75,14 +75,14 @@ The settings are supplied by a file “modsync.xml” on the FTP server, for exa
 ```
 <?xml version="1.0" encoding="utf-8"?>
 <Settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <ToolVersion>1.0.0.8</ToolVersion>
+  <ToolVersion>1.0.1.1</ToolVersion>
   <ToolDownloadFile>modsync.exe</ToolDownloadFile>
   <JavaVersion>1.7</JavaVersion>
   <JavaDownloadFile>jre-7u75-windows-i586-iftw.exe</JavaDownloadFile>
   <MinecraftVersion>1.7.10</MinecraftVersion>
   <MinecraftDownloadFile>Minecraft Launcher.exe</MinecraftDownloadFile>
-  <ForgeVersion>1.7.10-Forge10.13.2.1291</ForgeVersion>
-  <ForgeDownloadFile>forge-1.7.10-10.13.2.1291-installer.jar</ForgeDownloadFile>
+  <ForgeVersion>1.7.10-Forge10.13.4.1614-1.7.10</ForgeVersion>
+  <ForgeDownloadFile>forge-1.7.10-10.13.4.1614-1.7.10-installer.jar</ForgeDownloadFile>
   <SyncFolders>mods,resourcepacks,shaderpacks,config</SyncFolders>
   <SyncAllowUpload>true</SyncAllowUpload>
   <ServerName>My Minecraft Server</ServerName>
@@ -108,26 +108,25 @@ modsync.exe
 modsync.xml
 jre-7u75-windows-i586-iftw.exe
 MinecraftLauncher.exe
-forge-1.7.10-10.13.2.1291-installer.jar
+forge-1.7.10-10.13.4.1614-1.7.10-installer.jar
 ```
 
 Write access is only needed for the command line option “updateserver” to work, and can be omitted otherwise.
 
-**Compiling**
+**Rebuilding**
 
-Although you could use the binary from [here](https://github.com/hupster/modsync/blob/master/bin/Release/modsync.exe?raw=true), I encourage everyone to compile your own, reviewing the source code.
-You could do so by installing Visual Studio, I used version [2008 sp1](http://download.microsoft.com/download/E/8/E/E8EEB394-7F42-4963-A2D8-29559B738298/VS2008ExpressWithSP1ENUX1504728.iso), newer should work too.
+To rebuild modsync:
+- Install Microsoft Visual Studio, version [2008 sp1](http://download.microsoft.com/download/E/8/E/E8EEB394-7F42-4963-A2D8-29559B738298/VS2008ExpressWithSP1ENUX1504728.iso) or newer.
 - Open the project by clicking modsync.csproj
-- The reference to edtFTPnet.dll will be missing, get it at EnterpriseDT: download the zip and copy the edtFTPnet.dll from the bin folder to the modsync project folder
+- Rebuilding requires [edtFTPnet](https://enterprisedt.com/products/edtftpnet/) from EnterpriseDT. To fix the missing reference to edtFTPnet.dll, download the zip and copy the edtFTPnet.dll from the bin folder to the modsync project folder
 - Click Build, Build solution
+- Use modsync.exe from the folder bin\Release
 
-**Deployment**
+**Download**
 
-The application has a single dependency outside of .NET 3.5 SP1: [edtFTPnet](https://enterprisedt.com/products/edtftpnet/) from EnterpriseDT.
-This library is included in the program as an embedded resource, allowing the executable to be run by itself.
-
-So just copy modsync.exe to the computers to become Minecraft clients. You can use the binary from [here](https://github.com/hupster/modsync/blob/master/bin/Release/modsync.exe?raw=true), or preferably, build the application yourself and just copy modsync.exe from the folder bin\Release.
-The binary available for download does not include an FTP link, so will ask for the details on first start.
+Download the binary from [here](https://github.com/hupster/modsync/blob/master/bin/Release/modsync.exe?raw=true).
+The application requires [.NET 3.5 SP1](https://www.microsoft.com/en-us/download/details.aspx?id=22) to run.
+Modsync will ask for FTP connection details on the first run.
 
 **Disclaimer**
 

@@ -37,6 +37,7 @@ namespace modsync
             catch (Exception ex)
             {
                 Console.WriteLine(Strings.Get("MinecraftError") + ex.Message);
+                Console.WriteLine(Strings.Get("PressKey"));
                 Console.ReadKey();
                 Program.Exit(false);
             }

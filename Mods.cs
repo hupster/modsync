@@ -102,6 +102,7 @@ namespace modsync
             catch (Exception ex)
             {
                 Console.WriteLine(Strings.Get("SyncError") + ex.Message);
+                Console.WriteLine(Strings.Get("PressKey"));
                 Console.ReadKey();
                 return false;
             }

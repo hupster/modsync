@@ -42,12 +42,11 @@ namespace modsync
             {"JavaOK", "Java ok"},
             {"JavaNotFound", "Java versie niet gevonden: "},
             {"JavaDownload", "Java downloaden ..."},
-            {"JavaInstall", "Druk op een toets om Java te installeren, en start opnieuw!"},
+            {"JavaInstall", "Java installeren ..."},
             {"JavaError", "Java download error: "},
             {"MinecraftOK", "Minecraft ok"},
             {"MinecraftDownload", "Minecraft downloaden ..."},
             {"MinecraftError", "Minecraft error: "},
-            {"MinecraftStart", "Druk op een toets, laat Minecraft starten, en start opnieuw!"},
             {"Profile", "Profiel: "},
             {"ProfileAdded", " toegevoegd"},
             {"ProfileSelected", " geselecteerd"},
@@ -56,7 +55,7 @@ namespace modsync
             {"ProfileError", "Kan profiel niet bijwerken, selecteer spel versie "},
             {"ForgeOK", "Forge ok"},
             {"ForgeDownload", "Forge downloaden ..."},
-            {"ForgeInstall", "Druk op een toets om Forge te installeren (klik OK), en start opnieuw!"},
+            {"ForgeInstall", "Forge installeren ..."},
             {"ForgeError", "Forge error: "},
             {"SyncUpNotAllowed", "Uploaden is uitgeschakeld"},
             {"SyncUp", "Uploaden"},
@@ -65,7 +64,8 @@ namespace modsync
             {"SyncError", "Sync error: "},
             {"ServerAdded", "Server toegevoegd: "},
             {"ServerError", "Server error: "},
-            {"DllError", "Kan bestand niet laden: "}
+            {"DllError", "Kan bestand niet laden: "},
+            {"PressKey", "[druk op een knop om verder te gaan]"}
         };
 
         // english
@@ -85,12 +85,11 @@ namespace modsync
             {"JavaOK", "Java ok"},
             {"JavaNotFound", "Java version not found: "},
             {"JavaDownload", "Downloading Java ..."},
-            {"JavaInstall", "Hit any key to install Java, then restart!"},
+            {"JavaInstall", "Installing Java ..."},
             {"JavaError", "Java download error: "},
             {"MinecraftOK", "Minecraft ok"},
             {"MinecraftDownload", "Downloading Minecraft ..."},
             {"MinecraftError", "Minecraft error: "},
-            {"MinecraftStart", "Hit any key, let Minecraft load once, then restart!"},
             {"Profile", "Profile: "},
             {"ProfileAdded", " added"},
             {"ProfileSelected", " selected"},
@@ -99,7 +98,7 @@ namespace modsync
             {"ProfileError", "Unable to update profile, please select game version "},
             {"ForgeOK", "Forge ok"},
             {"ForgeDownload", "Downloading Forge ..."},
-            {"ForgeInstall", "Hit any key to install Forge (click OK), then restart!"},
+            {"ForgeInstall", "Installing Forge ..."},
             {"ForgeError", "Forge error: "},
             {"SyncUpNotAllowed", "Uploading is disabled"},
             {"SyncUp", "Uploading"},
@@ -108,7 +107,8 @@ namespace modsync
             {"SyncError", "Error syncing: "},
             {"ServerAdded", "Added server: "},
             {"ServerError", "Server error: "},
-            {"DllError", "Unable to load library: "}
+            {"DllError", "Unable to load library: "},
+            {"PressKey", "[press any key to continue]"}
         };
     }
 }
