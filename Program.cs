@@ -28,10 +28,10 @@ namespace modsync
             {
                 return;
             }
-            
+
             // add embedded dll
             Resources.RegisterEmbeddedResources();
-            
+
             // start program
             MainLoad(args);
         }
@@ -74,6 +74,9 @@ namespace modsync
                 return;
             }
 
+            // ask for repair
+            Repair();
+
             // update config from server
             Config.FtpUpdate(ref ftpcon);
 
@@ -104,6 +107,59 @@ namespace modsync
 
             // exit launching game
             Exit(true);
+        }
+
+        static void Repair()
+        {
+            Console.WriteLine(Strings.Get("RepairAsk"));
+            Thread.Sleep(2000);
+            if (Console.KeyAvailable)
+            {
+                ConsoleKeyInfo repair = Console.ReadKey();
+                if (repair.Key == ConsoleKey.R)
+                {
+                    // backup saves
+                    RepairMoveSaves(Locations.LocalFolderName_Saves, Locations.LocalFolderName_SavesBackup);
+
+                    // delete minecraft
+                    try
+                    {
+                        Directory.Delete(Locations.LocalFolderName_Minecraft, true);
+                        Console.WriteLine(Strings.Get("RepairSuccess"));
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine(Strings.Get("RepairFail"));
+                    }
+                    if (!Directory.Exists(Locations.LocalFolderName_Minecraft))
+                    {
+                        Directory.CreateDirectory(Locations.LocalFolderName_Minecraft);
+                    }
+
+                    // restore saves
+                    RepairMoveSaves(Locations.LocalFolderName_SavesBackup, Locations.LocalFolderName_Saves);
+                }
+            }
+        }
+
+        static void RepairMoveSaves(string src, string dst)
+        {
+            try
+            {
+                if (!Directory.Exists(dst))
+                {
+                    Directory.CreateDirectory(dst);
+                }
+                foreach (string save in Directory.GetDirectories(src))
+                {
+                    DirectoryInfo dir = new DirectoryInfo(save);
+                    if (!Directory.Exists(dst + "\\" + dir.Name))
+                    {
+                        Directory.Move(save, dst + "\\" + dir.Name);
+                    }
+                }
+            }
+            catch (Exception) { }
         }
 
         public static void Exit(bool launchgame)

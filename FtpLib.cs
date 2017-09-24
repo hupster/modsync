@@ -239,7 +239,8 @@ namespace modsync
                         }
 
                         // check modification time
-                        if (RemoteStamp != LocalStamp)
+                        TimeSpan TimeDiff = RemoteStamp - LocalStamp;
+                        if ((TimeDiff < TimeSpan.FromMinutes(-1)) || (TimeDiff > TimeSpan.FromMinutes(1)))
                         {
                             m.Exists = true;
                             if (RemoteStamp < LocalStamp)

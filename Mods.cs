@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace modsync
 {
@@ -30,6 +31,50 @@ namespace modsync
                     ftpsyncsettings.WhenNewerRemote = FTPAction.Copy;
                     ftpsyncsettings.WhenLargerLocal = FTPAction.Noop;
                     ftpsyncsettings.WhenLargerRemote = FTPAction.Noop;
+                }
+                else if (folder == "cachedImages/skins")
+                {
+                    // special case for cachedImages folder
+                    ftpsyncsettings.Recurse = true;
+                    ftpsyncsettings.WhenMissingLocal = FTPAction.Copy;
+                    ftpsyncsettings.WhenMissingRemote = FTPAction.Copy;
+                    ftpsyncsettings.WhenNewerLocal = FTPAction.Copy;
+                    ftpsyncsettings.WhenNewerRemote = FTPAction.Copy;
+                    ftpsyncsettings.WhenLargerLocal = FTPAction.Noop;
+                    ftpsyncsettings.WhenLargerRemote = FTPAction.Noop;
+
+                    // move all small png files from desktop to cachedImages folder
+                    foreach (string src in Directory.GetFiles(Locations.LocalFolderName_Desktop))
+                    {
+                        if (src.EndsWith(".png"))
+                        {
+                            FileInfo src_file = new System.IO.FileInfo(src);
+                            if (src_file.Length < 2048)
+                            {
+                                string dst = Locations.LocalFolderName_Minecraft + "\\cachedImages\\skins\\" + src_file.Name;
+                                if (File.Exists(dst))
+                                {
+                                    FileInfo dst_file = new System.IO.FileInfo(dst);
+                                    if (dst_file.LastWriteTime >= src_file.LastWriteTime)
+                                    {
+                                        continue;
+                                    }
+                                }
+                                
+                                try
+                                {
+                                    File.Delete(dst);
+                                    src_file.CopyTo(dst);
+                                    Console.WriteLine("Uploading skin: " + src_file.Name);
+                                }
+                                catch (Exception)
+                                {
+                                    Console.WriteLine("Error uploading skin: " + src_file.Name);
+                                    Console.ReadKey();
+                                }
+                            }
+                        }
+                    }
                 }
                 else
                 {
@@ -90,7 +135,7 @@ namespace modsync
             try
             {
                 // make list of changes
-                string localFolder = Locations.LocalFolderName_Minecraft + "\\" + folder;
+                string localFolder = Locations.LocalFolderName_Minecraft + "\\" + folder.Replace("/", "\\");
                 string remoteFolder = Config.ftpsettings.FtpServerFolder + "/" + folder;
                 List<FTPSyncModification> changes = ftp.CompareDirectory(localFolder, remoteFolder, ftpsyncsettings);
                 if (changes.Count > 0)

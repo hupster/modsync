@@ -9,11 +9,14 @@ namespace modsync
     static class Locations
     {
         // locations on local pc
+        public static string LocalFolderName_Desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         public static string LocalFolderName_Roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         public static string LocalFolderName_Minecraft = LocalFolderName_Roaming + "\\.minecraft";
         public static string LocalFolderName_TempDir = LocalFolderName_Minecraft;
         public static string LocalFolderName_Versions = LocalFolderName_Minecraft + "\\versions";
         public static string LocalFolderName_Launcher = LocalFolderName_Minecraft + "\\minecraft launcher";
+        public static string LocalFolderName_Saves = LocalFolderName_Minecraft + "\\saves";
+        public static string LocalFolderName_SavesBackup = LocalFolderName_Minecraft + ".saves";
         public static string Launcher_Install = ProgramFilesx86() + "\\Minecraft\\MinecraftLauncher.exe";
         public static string Launcher_Install_Jar = ProgramFilesx86() + "\\Minecraft\\game\\launcher.jar";
         public static string Launcher_Download = LocalFolderName_Launcher + "\\Minecraft Launcher.exe";
