@@ -20,11 +20,8 @@ namespace modsync
             }
 
             // check registery key
-            RegistryKey subKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\JavaSoft\\Java Runtime Environment\\" + Config.settings.JavaVersion);
-            if (subKey != null)
+            if (CheckRegistery())
             {
-                Locations.Javaw = subKey.GetValue("JavaHome").ToString() + "\\bin\\javaw.exe";
-                Locations.Java = subKey.GetValue("JavaHome").ToString() + "\\bin\\java.exe";
                 Console.WriteLine(Strings.Get("JavaOK"));
                 return;
             }
@@ -48,6 +45,9 @@ namespace modsync
                 var process = Process.Start(psi);
                 process.WaitForExit();
                 File.Delete(LocalFile);
+
+                // check registery
+                CheckRegistery();
             }
             catch (Exception ex)
             {
@@ -55,6 +55,18 @@ namespace modsync
                 Console.WriteLine(Strings.Get("PressKey"));
                 Console.ReadKey();
             }
+        }
+
+        static bool CheckRegistery()
+        {
+            RegistryKey subKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\JavaSoft\\Java Runtime Environment\\" + Config.settings.JavaVersion);
+            if (subKey != null)
+            {
+                Locations.Javaw = subKey.GetValue("JavaHome").ToString() + "\\bin\\javaw.exe";
+                Locations.Java = subKey.GetValue("JavaHome").ToString() + "\\bin\\java.exe";
+                return true;
+            }
+            return false;
         }
     }
 }

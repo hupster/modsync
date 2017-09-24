@@ -78,7 +78,7 @@ namespace modsync
             Config.FtpUpdate(ref ftpcon);
 
             // check for executable updates
-            Update.ExecutableUpdate(ref ftpcon);
+            Update.ExecutableUpdate(ref ftpcon, args);
 
             // handle push
             if (push)

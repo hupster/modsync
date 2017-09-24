@@ -56,7 +56,7 @@ Checks if there is a server with the address 'ServerAddress' in the multiplayer 
 
 - Start Minecraft
 
-After all checks, start the game by executing the launcher. This allows for the tool to be installed as a Minecraft launcher, checking for new mods at every start.
+After all checks, start the game by executing the launcher. This allows for the tool to be installed as a Minecraft launcher, syncing folders at every start.
 
 **Configuration**
 

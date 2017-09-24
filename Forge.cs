@@ -9,6 +9,8 @@ using EnterpriseDT.Net.Ftp;
 
 namespace modsync
 {
+    using ProfileList = Dictionary<string, Dictionary<string, string>>;
+
     static class Forge
     {
         public static void Check(ref FTPConnection ftpcon)
@@ -29,9 +31,10 @@ namespace modsync
                 Install(ref ftpcon);
             }
 
+            // create forge profile if missing
             UpdateProfile("Forge", Config.settings.ForgeVersion);
         }
-        
+
         static void Install(ref FTPConnection ftpcon)
         {
             // create default profile if missing
@@ -39,7 +42,7 @@ namespace modsync
             {
                 UpdateProfile("(Default)", Config.settings.MinecraftVersion);
             }
-            
+
             string LocalFile = Locations.LocalFolderName_TempDir + "\\" + Config.settings.ForgeDownloadFile;
             string RemoteFile = Config.ftpsettings.FtpServerFolder + "/" + Config.settings.ForgeDownloadFile;
             try
@@ -85,141 +88,143 @@ namespace modsync
         // updates launcher_profiles.json to use a specific profile, game version and java location
         static void UpdateProfile(string profile, string version)
         {
-            try
+            string file = "";
+            if (File.Exists(Locations.LauncherProfiles))
             {
-                string file;
-                bool write, exists;
+                file = File.ReadAllText(Locations.LauncherProfiles, Encoding.ASCII);
+            }
+            string file_org = file;
+
+            // read profiles
+            int prof_idx;
+            ProfileList profiles = ReadProfiles(ref file, out prof_idx);
+
+            // add and update entry 
+            if (!profiles.ContainsKey(profile))
+            {
+                profiles.Add(profile, new Dictionary<string, string>());
+            }
+            profiles[profile]["name"] = profile;
+            profiles[profile]["lastVersionId"] = version;
+            if (File.Exists(Locations.Javaw))
+            {
+                profiles[profile]["javaDir"] = Locations.Javaw.Replace("\\", "\\\\");
+            }
+
+            // remove profile that can be created by forge install
+            profiles.Remove("forge");
+
+            // write profiles
+            string prof_str = WriteProfiles(profiles, profile);
+
+            // insert profile section
+            file = file.Insert(prof_idx, prof_str);
+            file = file.Replace(",\n}", "\n}");
+
+            if (file != file_org)
+            {
                 if (File.Exists(Locations.LauncherProfiles))
                 {
-                    file = File.ReadAllText(Locations.LauncherProfiles, Encoding.ASCII);
-                    write = false;
-                    exists = true;
+                    File.Copy(Locations.LauncherProfiles, Locations.LauncherProfiles + ".org", true);
                 }
-                else
-                {
-                    file = DefaultProfile();
-                    write = true;
-                    exists = false;
-                }
+                File.WriteAllText(Locations.LauncherProfiles, file, Encoding.ASCII);
+            }
+        }
 
-                CheckExistingProfile(ref file, ref write, profile);
-                CheckSelectedProfile(ref file, ref write, profile);
-                CheckProfileKey(ref file, ref write, profile, "lastVersionId", version, Strings.Get("ProfileGameVersion"));
-                if (File.Exists(Locations.Javaw))
-                {
-                    CheckProfileKey(ref file, ref write, profile, "javaDir", Locations.Javaw.Replace("\\", "\\\\"), Strings.Get("ProfileJavaVersion"));
-                }
+        // read profile string into object
+        static ProfileList ReadProfiles(ref string file, out int prof_idx)
+        {
+            ProfileList profiles = new ProfileList();
 
-                if (write)
+            try
+            {
+                string str_prof = "\"profiles\": {";
+                prof_idx = file.IndexOf(str_prof);
+                int idx, idx_open, idx_close;
+                if (prof_idx >= 0)
                 {
-                    if (exists)
+                    idx = prof_idx + str_prof.Length;
+
+                    while (true)
                     {
-                        File.Copy(Locations.LauncherProfiles, Locations.LauncherProfiles + ".org", true);
+                        // look for profile block
+                        idx_open = file.IndexOf("{", idx);
+                        idx_close = file.IndexOf("}", idx);
+                        if ((idx_open == -1) || (idx_open > idx_close))
+                        {
+                            break;
+                        }
+
+                        // found new profile
+                        string name = ParseQuotedStr(file.Substring(idx, idx_open - idx));
+                        profiles.Add(name, new Dictionary<string, string>());
+
+                        // parse the values
+                        string[] pars = file.Substring(idx_open, idx_close - idx_open).Split('\n');
+                        foreach (string par in pars)
+                        {
+                            string[] vals = par.Split(':');
+                            if (vals.Length == 2)
+                            {
+                                profiles[name].Add(ParseQuotedStr(vals[0]), ParseQuotedStr(vals[1]));
+                            }
+                        }
+                        idx = idx_close + 1;
                     }
-                    File.WriteAllText(Locations.LauncherProfiles, file, Encoding.ASCII);
+
+                    // remove profile section from file
+                    idx_open = file.LastIndexOf("\n", prof_idx);
+                    idx_close = file.IndexOf("\n", idx_close);
+                    file = file.Remove(idx_open + 1, idx_close - idx_open);
+                    prof_idx = idx_open + 1;
+
+                    // also remove selectedProfile line
+                    idx = file.IndexOf("\"selectedProfile\":");
+                    if (idx >= 0)
+                    {
+                        idx_open = file.LastIndexOf("\n", idx);
+                        idx_close = file.IndexOf("\n", idx);
+                        file = file.Remove(idx_open + 1, idx_close - idx_open);
+                    }
+                    return profiles;
                 }
             }
             catch (Exception)
             {
-                Console.WriteLine(Strings.Get("ProfileError") + version);
-                Console.WriteLine(Strings.Get("PressKey"));
-                Console.ReadKey();
-                Program.Exit(true);
+                Console.WriteLine(Strings.Get("ProfileError"));
             }
+
+            // bad file, create empty one
+            file = "{\n}";
+            prof_idx = 2;
+            return profiles;
         }
 
-        // returns a default profile file
-        static string DefaultProfile()
+        static string ParseQuotedStr(string str)
         {
-            return "{\n  \"profiles\": {\n    \"(Default)\": {\n      \"name\": \"(Default)\"\n    }\n  },\n  \"selectedProfile\": \"(Default)\"\n}";
+            int i = str.IndexOf("\"");
+            int j = str.LastIndexOf("\"");
+            return str.Substring(i + 1, j - i - 1);
         }
 
-        // checks if a profile exists, or adds it
-        static void CheckExistingProfile(ref string file, ref bool write, string profile)
+        // write profile object into string
+        static string WriteProfiles(ProfileList profiles, string selectedprofile)
         {
-            string str_search = "\"name\": \"" + profile + "\"";
-            int idx_start = file.IndexOf(str_search);
-            if (idx_start < 0)
+            string str_prof = "  \"profiles\": {\n";
+            foreach (KeyValuePair<string, Dictionary<string, string>> profile in profiles)
             {
-                // add profile
-                string str_search_prof = "\"profiles\": {";
-                idx_start = file.IndexOf(str_search_prof);
-                if (idx_start < 0)
+                str_prof += string.Format("    \"{0}\": {{\n", profile.Key);
+                foreach (KeyValuePair<string, string> pars in profile.Value)
                 {
-                    // bad file
-                    return;
+                    str_prof += string.Format("      \"{0}\": \"{1}\",\n", pars.Key, pars.Value);
                 }
-                idx_start += str_search_prof.Length;
-                string str_profile = "\n    \"" + profile + "\": {\n      " + str_search + "\n    },";
-                file = file.Substring(0, idx_start) + str_profile + file.Substring(idx_start, file.Length - idx_start);
-                write = true;
-                Console.WriteLine(Strings.Get("Profile") + profile + Strings.Get("ProfileAdded"));
+                str_prof = str_prof.Substring(0, str_prof.Length - 2);
+                str_prof += "\n    },\n";
             }
-        }
-
-        // checks if a specific profile is selected, or adds the line
-        static void CheckSelectedProfile(ref string file, ref bool write, string profile)
-        {
-            string str_search = "\"selectedProfile\": \"";
-            int idx_start = file.IndexOf(str_search);
-            if (idx_start >= 0)
-            {
-                idx_start += str_search.Length;
-                int idx_end = file.IndexOf("\"", idx_start);
-                if (idx_end >= 0)
-                {
-                    string curprofile = file.Substring(idx_start, idx_end - idx_start);
-                    if (curprofile != profile)
-                    {
-                        file = file.Substring(0, idx_start) + profile + file.Substring(idx_end, file.Length - idx_end);
-                        write = true;
-                        Console.WriteLine(Strings.Get("Profile") + profile + Strings.Get("ProfileSelected"));
-                    }
-                }
-            }
-        }
-
-        // checks if a key exists in a profile and is set to a specific value, or adds/updates the key
-        static void CheckProfileKey(ref string file, ref bool write, string profile, string key, string value, string keystr)
-        {
-            string str_search = "\"name\": \"" + profile + "\"";
-            int idx_start = file.IndexOf(str_search);
-            int idx_end, idx_profend;
-
-            if (idx_start >= 0)
-            {
-                // profile found, look for key
-                idx_start += str_search.Length;
-                str_search = "\"" + key + "\": \"";
-                idx_end = file.IndexOf(str_search, idx_start);
-                idx_profend = file.IndexOf("}", idx_start);
-
-                // if key found before profile end
-                if ((idx_end >= 0) && (idx_end < idx_profend))
-                {
-                    // update existing key
-                    idx_start = idx_end + str_search.Length;
-                    idx_end = file.IndexOf("\"", idx_start);
-                    if (idx_end >= 0)
-                    {
-                        string version = file.Substring(idx_start, idx_end - idx_start);
-                        if (version != value)
-                        {
-                            file = file.Substring(0, idx_start) + value + file.Substring(idx_end, file.Length - idx_end);
-                            write = true;
-                            Console.WriteLine(Strings.Get("Profile") + keystr + value);
-                        }
-                    }
-                }
-                else
-                {
-                    // insert new key
-                    string str_write = ",\n      " + str_search + value + "\"";
-                    file = file.Substring(0, idx_start) + str_write + file.Substring(idx_start, file.Length - idx_start);
-                    write = true;
-                    Console.WriteLine(Strings.Get("Profile") + keystr + value);
-                }
-            }
+            str_prof = str_prof.Substring(0, str_prof.Length - 2);
+            str_prof += "\n  },\n";
+            str_prof += "  \"selectedProfile\": \"" + selectedprofile + "\",\n";
+            return str_prof;
         }
 
         #endregion
