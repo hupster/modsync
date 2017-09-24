@@ -37,15 +37,17 @@ Checks if 'ForgeVersion' is installed (use the version shown below at Settings o
 All folders listed in the comma-separated list set by 'SyncFolders' are synced with the FTP server.
 Typical folders to sync are:
 
-config: containing mod config files
-mods: containing Forge mods
-resourcepacks: containing resource packs, selectable in the game by Options\Resource Packs
-shaderpacks: containing shaders, for use with the GLSL Shaders Mod, selectable in the game by Options\Shaders
-cachedImages/skins: containing skins, for use with the OfflineSkins mod, see skin section below
+__config__: containing mod config files
 
-The tool downloads any missing file, and removes any local file that is missing on the FTP server, showing progress and actions during sync.
-If the “config" folder is listed, it is synced with different settings: don't remove any local file, just download any file that is newer on the server, or missing locally. This allows updating specific mod setting files, to fix incompatibilities.
-Also the "cachedImages/skins" folder has different sync settings: files from this folder are also uploaded to the server. This requires 'SyncAllowUpload' to be set to “true”.
+__mods__: containing Forge mods
+
+__resourcepacks__: containing resource packs, selectable in the game by Options\Resource Packs
+
+__shaderpacks__: containing shaders, for use with the GLSL Shaders Mod, selectable in the game by Options\Shaders
+
+__cachedImages/skins__: containing skins, for use with the OfflineSkins mod, see skin section below
+
+The tool normally downloads any missing file, and removes any local file that is missing on the FTP server, showing progress and actions during sync. If the “config" folder is listed, it is synced with different settings: don't remove any local file, just download any file that is newer on the server, or missing locally. This allows updating specific mod setting files, to fix incompatibilities. Also the "cachedImages/skins" folder has different sync settings: files from this folder are also uploaded to the server. This requires 'SyncAllowUpload' to be set to “true”.
 
 If command line option “updateserver” is given and 'SyncAllowUpload' is set to “true”, perform the sync the other way round: Upload any file missing on the FTP server, and remove any file missing locally. The “config" folder is skipped in this case when listed, also the game is not started when done.
 
