@@ -38,17 +38,22 @@ All folders listed in the comma-separated list set by 'SyncFolders' are synced w
 Typical folders to sync are:
 
 config: containing mod config files
-
 mods: containing Forge mods
-
 resourcepacks: containing resource packs, selectable in the game by Options\Resource Packs
-
 shaderpacks: containing shaders, for use with the GLSL Shaders Mod, selectable in the game by Options\Shaders
+cachedImages/skins: containing skins, for use with the OfflineSkins mod, see skin section below
 
 The tool downloads any missing file, and removes any local file that is missing on the FTP server, showing progress and actions during sync.
 If the “config" folder is listed, it is synced with different settings: don't remove any local file, just download any file that is newer on the server, or missing locally. This allows updating specific mod setting files, to fix incompatibilities.
+Also the "cachedImages/skins" folder has different sync settings: files from this folder are also uploaded to the server. This requires 'SyncAllowUpload' to be set to “true”.
 
 If command line option “updateserver” is given and 'SyncAllowUpload' is set to “true”, perform the sync the other way round: Upload any file missing on the FTP server, and remove any file missing locally. The “config" folder is skipped in this case when listed, also the game is not started when done.
+
+- Offline skin support
+
+The mod OfflineSkins allows using your skin on an offline server. The mod sync tool allows users to change their skin, by checking for modifications in the local skin files (folder "cachedImages/skins") and uploading these files to the server. Any uploaded skin will be available to the other users after they run the sync tool again, which will download the new skin.
+
+The skin files are generic minecraft skins that can be created by for instance skincraft. To facilitate changing your skin, the sync tool moves all skin files (very small png files) from the desktop to the minecraft directory before syncing. So the user just has to put the file on the desktop. The user is responsible for giving the skin the correct name: <username>.png
 
 - Check server list
 
@@ -75,15 +80,16 @@ The settings are supplied by a file “modsync.xml” on the FTP server, for exa
 ```
 <?xml version="1.0" encoding="utf-8"?>
 <Settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <ToolVersion>1.0.1.1</ToolVersion>
+  <ToolVersion>1.0.1.6</ToolVersion>
   <ToolDownloadFile>modsync.exe</ToolDownloadFile>
-  <JavaVersion>1.7</JavaVersion>
-  <JavaDownloadFile>jre-7u75-windows-i586-iftw.exe</JavaDownloadFile>
-  <MinecraftVersion>1.7.10</MinecraftVersion>
-  <MinecraftDownloadFile>Minecraft Launcher.exe</MinecraftDownloadFile>
-  <ForgeVersion>1.7.10-Forge10.13.4.1614-1.7.10</ForgeVersion>
-  <ForgeDownloadFile>forge-1.7.10-10.13.4.1614-1.7.10-installer.jar</ForgeDownloadFile>
-  <SyncFolders>mods,resourcepacks,shaderpacks,config</SyncFolders>
+  <JavaVersion>1.8</JavaVersion>
+  <JavaDownloadFile>jre-8u111-windows-i586.exe</JavaDownloadFile>
+  <JavaArguments>-Xmx1G -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:-UseAdaptiveSizePolicy -Xmn128M</JavaArguments>
+  <MinecraftVersion>1.8.9</MinecraftVersion>
+  <MinecraftDownloadFile>MinecraftLauncher.exe</MinecraftDownloadFile>
+  <ForgeVersion>1.8.9-forge1.8.9-11.15.1.1902-1.8.9</ForgeVersion>
+  <ForgeDownloadFile>forge-1.8.9-11.15.1.1902-1.8.9-installer.jar</ForgeDownloadFile>
+  <SyncFolders>mods,resourcepacks,shaderpacks,config,cachedImages/skins</SyncFolders>
   <SyncAllowUpload>true</SyncAllowUpload>
   <ServerName>My Minecraft Server</ServerName>
   <ServerAddress>192.168.0.1</ServerAddress>
@@ -104,11 +110,12 @@ config/
 mods/
 resourcepacks/
 shaderpacks/
+cachedImages/skins/
 modsync.exe
 modsync.xml
-jre-7u75-windows-i586-iftw.exe
+jre-8u111-windows-i586.exe
 MinecraftLauncher.exe
-forge-1.7.10-10.13.4.1614-1.7.10-installer.jar
+forge-1.8.9-11.15.1.1902-1.8.9-installer.jar
 ```
 
 Write access is only needed for the command line option “updateserver” to work, and can be omitted otherwise.
