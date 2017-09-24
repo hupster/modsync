@@ -32,7 +32,7 @@ namespace modsync
             }
 
             // create forge profile if missing
-            UpdateProfile("Forge", Config.settings.ForgeVersion);
+            UpdateProfile("Forge", Config.settings.ForgeVersion, Config.settings.JavaArguments);
         }
 
         static void Install(ref FTPConnection ftpcon)
@@ -40,7 +40,7 @@ namespace modsync
             // create default profile if missing
             if (!File.Exists(Locations.LauncherProfiles))
             {
-                UpdateProfile("(Default)", Config.settings.MinecraftVersion);
+                UpdateProfile("(Default)", Config.settings.MinecraftVersion, "");
             }
 
             string LocalFile = Locations.LocalFolderName_TempDir + "\\" + Config.settings.ForgeDownloadFile;
@@ -86,7 +86,7 @@ namespace modsync
         #region Profile File
 
         // updates launcher_profiles.json to use a specific profile, game version and java location
-        static void UpdateProfile(string profile, string version)
+        static void UpdateProfile(string profile, string version, string javaArgs)
         {
             string file = "";
             if (File.Exists(Locations.LauncherProfiles))
@@ -109,6 +109,10 @@ namespace modsync
             if (File.Exists(Locations.Javaw))
             {
                 profiles[profile]["javaDir"] = Locations.Javaw.Replace("\\", "\\\\");
+            }
+            if (javaArgs != "")
+            {
+                profiles[profile]["javaArgs"] = javaArgs;
             }
 
             // remove profile that can be created by forge install
