@@ -17,10 +17,8 @@ namespace modsync
         public static string LocalFolderName_Launcher = LocalFolderName_Minecraft + "\\minecraft launcher";
         public static string LocalFolderName_Saves = LocalFolderName_Minecraft + "\\saves";
         public static string LocalFolderName_SavesBackup = LocalFolderName_Minecraft + ".saves";
-        public static string Launcher_Install = ProgramFilesx86() + "\\Minecraft\\MinecraftLauncher.exe";
-        public static string Launcher_Install_Jar = ProgramFilesx86() + "\\Minecraft\\game\\launcher.jar";
-        public static string Launcher_Download = LocalFolderName_Launcher + "\\Minecraft Launcher.exe";
-        public static string Launcher_Download_Jar = LocalFolderName_Launcher + "\\game\\launcher.jar";
+        public static string Launcher = LocalFolderName_Launcher + "\\Minecraft Launcher.exe";
+        public static string Launcher_Jar = LocalFolderName_Launcher + "\\game\\launcher.jar";
         public static string LauncherProfiles = LocalFolderName_Minecraft + "\\launcher_profiles.json";
         public static string ServersFile = LocalFolderName_Minecraft + "\\servers.dat";
         public static string Java; //set from registery

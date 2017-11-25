@@ -3,6 +3,7 @@ import java.io.File;
 import java.net.URLClassLoader;
 import java.lang.reflect.Method;
 import java.io.PrintStream;
+import com.google.common.base.Predicate;
 
 public class ForgeInstallWrapper {
   private static File installerJar;
@@ -32,17 +33,44 @@ public class ForgeInstallWrapper {
       URL[] jarPath = { installerJar.toURI().toURL() };
       loader = new URLClassLoader(jarPath, ForgeInstallWrapper.class.getClassLoader());
       installerClass = Class.forName("net.minecraftforge.installer.ClientInstall", true, loader);
-      runnerMethod = installerClass.getMethod("run", File.class);
     } catch (Throwable e) {
       e.printStackTrace();
+	  System.exit(-1);
     }
 
     try {
-      Object instance = installerClass.newInstance();
-      Object result = runnerMethod.invoke(instance, minecraftDir);
-    } catch (Throwable e) {
-      System.out.println("Unable to install Forge");
-      System.exit(-1);
+      runnerMethod = installerClass.getMethod("run", File.class);
+	  
+	  try {
+        Object instance = installerClass.newInstance();
+        Object result = runnerMethod.invoke(instance, minecraftDir);
+      } catch (Throwable e) {
+        System.out.println("Unable to install Forge");
+        System.exit(-1);
+      }
+	  
+    } catch (Throwable e1) {
+	  try {
+	    runnerMethod = installerClass.getMethod("run", File.class, Predicate.class);
+		Predicate<String> optPred = new Predicate<String>() {
+			@Override
+			public boolean apply(String s) {
+				return false;
+			}
+		};
+		
+		try {
+          Object instance = installerClass.newInstance();
+          Object result = runnerMethod.invoke(instance, minecraftDir, optPred);
+        } catch (Throwable e) {
+          System.out.println("Unable to install Forge");
+          System.exit(-1);
+        }
+		
+	  } catch (Throwable e2) {
+        e2.printStackTrace();
+		System.exit(-1);
+	  }
     }
 
     System.out.println("Forge update complete");

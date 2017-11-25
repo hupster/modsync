@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <PlatformTarget>x86</PlatformTarget>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
@@ -95,7 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="edtFTPnet.dll" />
-    <EmbeddedResource Include="ForgeInstallWrapper.class" />
+    <EmbeddedResource Include="ForgeInstallWrapper.jar" />
     <Content Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>

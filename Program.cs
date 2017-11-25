@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using EnterpriseDT.Net.Ftp;
@@ -175,35 +174,7 @@ namespace modsync
 
             if (launchgame)
             {
-                // start extracted launcher with desired java version if possible
-                string jar = "";
-                if (File.Exists(Locations.Launcher_Install_Jar))
-                {
-                    jar = Locations.Launcher_Install_Jar;
-                }
-                else if (File.Exists(Locations.Launcher_Download_Jar))
-                {
-                    jar = Locations.Launcher_Download_Jar;
-                }
-                if (File.Exists(Locations.Javaw) && (jar != ""))
-                {
-                    ProcessStartInfo psi = new ProcessStartInfo();
-                    psi.FileName = Locations.Javaw;
-                    psi.WorkingDirectory = Path.GetDirectoryName(jar);
-                    psi.Arguments = "-cp \"" + jar + "\" net.minecraft.launcher.Main";
-                    psi.UseShellExecute = false;
-                    Process.Start(psi);
-                }
-                // start installed launcher
-                else if (File.Exists(Locations.Launcher_Install))
-                {
-                    Process.Start(Locations.Launcher_Install);
-                }
-                // start downloaded launcher
-                else if (File.Exists(Locations.Launcher_Download))
-                {
-                    Process.Start(Locations.Launcher_Download);
-                }
+                Minecraft.Start();
             }
             Environment.Exit(0);
         }

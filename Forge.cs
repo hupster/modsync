@@ -31,6 +31,12 @@ namespace modsync
                 Install(ref ftpcon);
             }
 
+            // FIXME workaround for launcher hanging when client id is set
+            if (File.Exists(Locations.LauncherProfiles))
+            {
+                File.Delete(Locations.LauncherProfiles);
+            }
+
             // create forge profile if missing
             UpdateProfile("Forge", Config.settings.ForgeVersion, Config.settings.JavaArguments);
         }
@@ -56,16 +62,20 @@ namespace modsync
                 if (File.Exists(Locations.Java))
                 {
                     // extract wrapper class to invoke client install
-                    Resources.ExtractFile(Locations.LocalFolderName_TempDir, "ForgeInstallWrapper.class");
+                    // java -cp "C:\path\to\ForgeInstallWrapper.jar;forge-x.y.z-installer.jar" ForgeInstallWrapper "forge-x.y.z-installer.jar" "C:\Users\[user]\AppData\Roaming\.minecraft"
+                    Resources.ExtractFile(Locations.LocalFolderName_TempDir, "ForgeInstallWrapper.jar");
                     ProcessStartInfo psi = new ProcessStartInfo();
                     psi.FileName = Locations.Java;
                     psi.WorkingDirectory = Path.GetDirectoryName(LocalFile);
-                    psi.Arguments = "-cp \"" + Locations.LocalFolderName_TempDir + "\" ForgeInstallWrapper \"" + Config.settings.ForgeDownloadFile + "\" \"" + Locations.LocalFolderName_Minecraft + "\"";
+                    psi.Arguments = "-cp \"" + Locations.LocalFolderName_TempDir + "\\ForgeInstallWrapper.jar;" + Config.settings.ForgeDownloadFile + "\" ";
+                    psi.Arguments += "ForgeInstallWrapper ";
+                    psi.Arguments += "\"" + Config.settings.ForgeDownloadFile + "\" ";
+                    psi.Arguments += "\"" + Locations.LocalFolderName_Minecraft + "\"";
                     psi.UseShellExecute = false;
                     var process = Process.Start(psi);
                     process.WaitForExit();
                     File.Delete(LocalFile);
-                    File.Delete(Locations.LocalFolderName_TempDir + "\\" + "ForgeInstallWrapper.class");
+                    File.Delete(Locations.LocalFolderName_TempDir + "\\" + "ForgeInstallWrapper.jar");
                 }
                 else
                 {
