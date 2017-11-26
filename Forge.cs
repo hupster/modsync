@@ -31,12 +31,6 @@ namespace modsync
                 Install(ref ftpcon);
             }
 
-            // FIXME workaround for launcher hanging when client id is set
-            if (File.Exists(Locations.LauncherProfiles))
-            {
-                File.Delete(Locations.LauncherProfiles);
-            }
-
             // create forge profile if missing
             UpdateProfile("Forge", Config.settings.ForgeVersion, Config.settings.JavaArguments);
         }
