@@ -31,6 +31,7 @@ namespace modsync
         public string ToolVersion = "";
         public string ToolDownloadFile = "";
         public string JavaVersion = "";
+        public string JavaArchitecture = "";
         public string JavaDownloadFile = "";
         public string JavaArguments = "";
         public string MinecraftVersion = "";
