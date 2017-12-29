@@ -22,7 +22,7 @@ Checks for updates of the tool itself. If the version set by config key 'ToolVer
 
 - Check Java
 
-Checks Java installation for a specific version set by 'JavaVersion'. If present, use this version for Minecraft. This resolves issues with mods not working with the latest version of Java. If not present, download installer 'JavaDownloadFile' from the FTP server and execute it.
+Checks Java installation for a specific version set by 'JavaVersion', having architecture 'JavaArchitecture' (32 or 64). If present, use this version for Minecraft. This resolves issues with mods not working with the latest version of Java. If not present, download installer 'JavaDownloadFile' from the FTP server and execute it.
 
 - Check Minecraft
 
@@ -82,15 +82,16 @@ The settings are supplied by a file “modsync.xml” on the FTP server, for exa
 ```
 <?xml version="1.0" encoding="utf-8"?>
 <Settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <ToolVersion>1.0.1.6</ToolVersion>
+  <ToolVersion>1.0.1.7</ToolVersion>
   <ToolDownloadFile>modsync.exe</ToolDownloadFile>
   <JavaVersion>1.8</JavaVersion>
-  <JavaDownloadFile>jre-8u111-windows-i586.exe</JavaDownloadFile>
-  <JavaArguments>-Xmx1G -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:-UseAdaptiveSizePolicy -Xmn128M</JavaArguments>
-  <MinecraftVersion>1.8.9</MinecraftVersion>
-  <MinecraftDownloadFile>MinecraftLauncher.exe</MinecraftDownloadFile>
-  <ForgeVersion>1.8.9-forge1.8.9-11.15.1.1902-1.8.9</ForgeVersion>
-  <ForgeDownloadFile>forge-1.8.9-11.15.1.1902-1.8.9-installer.jar</ForgeDownloadFile>
+  <JavaArchitecture>64</JavaArchitecture>
+  <JavaDownloadFile>jre-8u144-windows-x64.exe</JavaDownloadFile>
+  <JavaArguments>-Xmx1536M -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:-UseAdaptiveSizePolicy -Xmn128M</JavaArguments>
+  <MinecraftVersion>1.12.1</MinecraftVersion>
+  <MinecraftDownloadFile>Minecraft Launcher.exe</MinecraftDownloadFile>
+  <ForgeVersion>1.12.1-forge1.12.1-14.22.1.2478</ForgeVersion>
+  <ForgeDownloadFile>forge-1.12.1-14.22.1.2478-installer.jar</ForgeDownloadFile>
   <SyncFolders>mods,resourcepacks,shaderpacks,config,cachedImages/skins</SyncFolders>
   <SyncAllowUpload>true</SyncAllowUpload>
   <ServerName>My Minecraft Server</ServerName>
@@ -115,9 +116,9 @@ shaderpacks/
 cachedImages/skins/
 modsync.exe
 modsync.xml
-jre-8u111-windows-i586.exe
+jre-8u144-windows-x64.exe
 MinecraftLauncher.exe
-forge-1.8.9-11.15.1.1902-1.8.9-installer.jar
+forge-1.12.1-14.22.1.2478-installer.jar
 ```
 
 Write access is only needed for the command line option “updateserver” to work, and can be omitted otherwise.
