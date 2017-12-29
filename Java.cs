@@ -66,6 +66,17 @@ namespace modsync
                 Locations.Java = subKey.GetValue("JavaHome").ToString() + "\\bin\\java.exe";
                 return true;
             }
+            else
+            {
+                // Win10 x64 has sub key WOW6432Node where java key is stored (32b compatibility node for x64 machines)
+                subKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\WOW6432Node\\JavaSoft\\Java Runtime Environment\\" + Config.settings.JavaVersion);
+                if (subKey != null)
+                {
+                    Locations.Javaw = subKey.GetValue("JavaHome").ToString() + "\\bin\\javaw.exe";
+                    Locations.Java = subKey.GetValue("JavaHome").ToString() + "\\bin\\java.exe";
+                    return true;
+                }
+            }
             return false;
         }
     }
