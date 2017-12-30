@@ -92,7 +92,7 @@ namespace modsync
                         ProcessStartInfo startInfo = new ProcessStartInfo();
                         startInfo.WindowStyle = ProcessWindowStyle.Normal;
                         startInfo.FileName = "cmd.exe";
-                        startInfo.Arguments = "/C ping 127.0.0.1 -n 1 -w 5000 > nul & copy /Y " + LocalFile + " " + file_location + " & " + file_location + " " + string.Join(" ", args);
+                        startInfo.Arguments = "/C ping 127.0.0.1 -n 5 -w 1000 > nul & copy /Y " + LocalFile + " " + file_location + " & " + file_location + " " + string.Join(" ", args);
                         process.StartInfo = startInfo;
                         process.Start();
                         Program.Exit(false);
