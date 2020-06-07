@@ -1,0 +1,7 @@
+bin/Debug/
+bin/Release/
+!bin/Release/modsync.exe
+obj/
+edtFTPnet.dll
+modsync.csproj.user
+*.pfx

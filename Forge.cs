@@ -53,23 +53,40 @@ namespace modsync
                 ftpcon.DownloadFile(LocalFile, RemoteFile);
                 Console.WriteLine(Strings.Get("ForgeInstall"));
 
+                // parse forge version (e.g. 14.23.4.2747)
+                string version = Config.settings.ForgeVersion;
+                string wrapper = "ForgeInstallWrapper";
+                try
+                {
+                    version = version.Substring(version.LastIndexOf('-') + 1);
+                    version = version.Replace(".", "");
+                    int version_i = int.Parse(version);
+                    if (version_i > 142342747)
+                    {
+                        wrapper = "ForgeInstallWrapper2";
+                    }
+                }
+                catch (Exception)
+                {
+                }
+
                 if (File.Exists(Locations.Java))
                 {
                     // extract wrapper class to invoke client install
                     // java -cp "C:\path\to\ForgeInstallWrapper.jar;forge-x.y.z-installer.jar" ForgeInstallWrapper "forge-x.y.z-installer.jar" "C:\Users\[user]\AppData\Roaming\.minecraft"
-                    Resources.ExtractFile(Locations.LocalFolderName_TempDir, "ForgeInstallWrapper.jar");
+                    Resources.ExtractFile(Locations.LocalFolderName_TempDir, wrapper + ".jar");
                     ProcessStartInfo psi = new ProcessStartInfo();
                     psi.FileName = Locations.Java;
                     psi.WorkingDirectory = Path.GetDirectoryName(LocalFile);
-                    psi.Arguments = "-cp \"" + Locations.LocalFolderName_TempDir + "\\ForgeInstallWrapper.jar;" + Config.settings.ForgeDownloadFile + "\" ";
-                    psi.Arguments += "ForgeInstallWrapper ";
+                    psi.Arguments = "-cp \"" + Locations.LocalFolderName_TempDir + "\\" + wrapper + ".jar;" + Config.settings.ForgeDownloadFile + "\" ";
+                    psi.Arguments += wrapper + " ";
                     psi.Arguments += "\"" + Config.settings.ForgeDownloadFile + "\" ";
                     psi.Arguments += "\"" + Locations.LocalFolderName_Minecraft + "\"";
                     psi.UseShellExecute = false;
                     var process = Process.Start(psi);
                     process.WaitForExit();
                     File.Delete(LocalFile);
-                    File.Delete(Locations.LocalFolderName_TempDir + "\\" + "ForgeInstallWrapper.jar");
+                    File.Delete(Locations.LocalFolderName_TempDir + "\\" + wrapper + ".jar");
                 }
                 else
                 {
