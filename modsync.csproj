@@ -83,11 +83,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
-    <Compile Include="Forge.cs" />
     <Compile Include="Java.cs" />
     <Compile Include="Locations.cs" />
     <Compile Include="Minecraft.cs" />
+    <Compile Include="Modes\Fabric.cs" />
+    <Compile Include="Modes\Forge.cs" />
+    <Compile Include="Modes\Vanilla.cs" />
     <Compile Include="Mods.cs" />
+    <Compile Include="Profiles.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="Servers.cs" />
     <Compile Include="Settings.cs" />

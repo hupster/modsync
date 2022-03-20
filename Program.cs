@@ -95,8 +95,20 @@ namespace modsync
             // check minecraft
             Minecraft.Check(ref ftpcon);
 
-            // check forge
-            Forge.Check(ref ftpcon);
+            switch (Config.settings.MinecraftMode)
+            {
+                case "Fabric":
+                    // check fabric
+                    Fabric.Check(ref ftpcon);
+                    break;
+                case "Forge":
+                    // check forge
+                    Forge.Check(ref ftpcon);
+                    break;
+                default:
+                    Vanilla.Check(ref ftpcon);
+                    break;
+            }
 
             // sync folders
             Mods.Pull(ref ftp);

@@ -36,8 +36,11 @@ namespace modsync
         public string JavaArguments = "";
         public string MinecraftVersion = "";
         public string MinecraftDownloadFile = "";
+        public string MinecraftMode = "";
         public string ForgeVersion = "";
         public string ForgeDownloadFile = "";
+        public string FabricVersion = "";
+        public string FabricDownloadFile = "";
         public string SyncFolders = "";
         public string SyncAllowUpload = "";
         public string ServerName = "";

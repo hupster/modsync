@@ -1,15 +1,13 @@
 # modsync
 Minecraft Mod Sync tool
 
-Modsync is a small tool that can:
-- fully install Minecraft using configurable settings and installers, without user intervention and with very few dependencies
-- keep the installation in sync with the configured server, hosting the mods, resourcepacks and version settings
+Modsync is a small tool for automated modded Minecraft install and maintenance on remote Windows computers. Users require a single binary to install and play Minecraft. Controlled by a configution file on the server, they can receive automatic updates to Java, Fabric or Forge, mods and more. It supports Vanilla, Forge and Fabric.
 
-It can be used as a Minecraft pre-launcher. It will install everything required, and then start the Minecraft launcher. The installers to use and directories to sync are configurable from the server. When all checks are enabled, the tool can install Java, Minecraft with Forge complete with mods, resourcepacks and shaderpacks, without user intervention. Once installed, changing any of the versions in the config file of the server will result in an automated re-install at clients when they run the tool.
+It was created to easily get kids playing Minecraft on a custom multiplayer server, being able to add and update mods without having to update all the clients.
 
-Now there is the security risk of having you Minecraft directory accessed by the tool. That's why I provide the source code on Github, and encourage everyone to compile your own version, and share it with users that trust you.
+**Description**
 
-In essence, the tool requires a link to a FTP server, containing a config file, the directory with the mods to keep in sync, and installers to use when stuff is missing. The tool only approaches the configured FTP server, and no other sites or locations. Local file access is limited to the Minecraft directory, an optional launcher in program files. It will only remove or overwrite files in the directories listed in config file. So the person in control of the FTP server, has full control of the Minecraft installation at the clients. The tool does not require Administator rights, however the Java installer does.
+The tool requires details of a FTP server, from where it downloads a configuration file. All required files are downloaded from the configured FTP server, no other sites or locations are used. Local file access is limited to the Minecraft directory. No Administator rights are required except when prompted during Java install.
 
 **Features**
 
@@ -28,9 +26,15 @@ Checks Java installation for a specific version set by 'JavaVersion', having arc
 
 Checks presence of a Minecraft launcher in either Program Files (x86)\Minecraft or the Minecraft folder. If not present, download launcher 'MinecraftDownloadFile' from the FTP server and put it in the Minecraft folder. The 'MinecraftDownloadFile' should be the version without installer that you can get [here](https://minecraft.net/download).
 
-- Check Forge
+- Check Fabric or Forge
 
-Checks if 'ForgeVersion' is installed (use the version shown below at Settings or newer). If not, create default profile for 'MinecraftVersion' if required, download and install 'ForgeDownloadFile', and update launcher profile to use 'ForgeVersion'. Make sure that 'ForgeDownloadFile' does install 'ForgeVersion'. Use the .jar installer from [Forge](http://files.minecraftforge.net/minecraftforge/).
+Depending on setting 'MinecraftMode':
+
+Vanilla: Create default profile for 'MinecraftVersion' if required, runs vanilla Minecraft (no mods).
+
+Fabric: Checks if 'FabricVersion' is installed. If not, download and install 'FabricDownloadFile', and update launcher profile to use 'FabricVersion'. Make sure that 'FabricDownloadFile' does install 'FabricVersion'. Use the .json file that is placed in the 'installdir\versions\fabric-loader-xyz\' directory by the Client install from [Fabric](https://fabricmc.net/use/installer/).
+
+Forge: Checks if 'ForgeVersion' is installed (use the version shown below at Settings or newer). If not, download and install 'ForgeDownloadFile', and update launcher profile to use 'ForgeVersion'. Make sure that 'ForgeDownloadFile' does install 'ForgeVersion'. Use the .jar installer from [Forge](http://files.minecraftforge.net/minecraftforge/).
 
 - Sync Folders
 
@@ -77,21 +81,47 @@ It is also possible to hard-code the FTP info in Settings.cs, or to supply an FT
 
 - Settings
 
-The settings are supplied by a file “modsync.xml” on the FTP server, for example:
+The settings are supplied by a file “modsync.xml” on the FTP server.
+
+Example for Fabric:
 
 ```
 <?xml version="1.0" encoding="utf-8"?>
 <Settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <ToolVersion>1.0.1.7</ToolVersion>
+  <ToolVersion>1.0.1.9</ToolVersion>
+  <ToolDownloadFile>modsync.exe</ToolDownloadFile>
+  <JavaVersion>17.0.1.12</JavaVersion>
+  <JavaArchitecture>x64</JavaArchitecture>
+  <JavaDownloadFile>OpenJDK17U-jre_x64_windows_hotspot_17.0.1_12.msi</JavaDownloadFile>
+  <JavaArguments>-Xms1G -Xmx4G</JavaArguments>
+  <MinecraftVersion>1.18.1</MinecraftVersion>
+  <MinecraftDownloadFile>Minecraft Launcher.exe</MinecraftDownloadFile>
+  <MinecraftMode>Fabric</MinecraftMode>
+  <FabricVersion>fabric-loader-0.12.12-1.18.1</FabricVersion>
+  <FabricDownloadFile>fabric-loader-0.12.12-1.18.1.json</FabricDownloadFile>
+  <SyncFolders>mods</SyncFolders>
+  <SyncAllowUpload>true</SyncAllowUpload>
+  <ServerName>My Minecraft Server</ServerName>
+  <ServerAddress>192.168.0.1</ServerAddress>
+</Settings>
+```
+
+Example for Forge:
+
+```
+<?xml version="1.0" encoding="utf-8"?>
+<Settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ToolVersion>1.0.1.9</ToolVersion>
   <ToolDownloadFile>modsync.exe</ToolDownloadFile>
   <JavaVersion>1.8</JavaVersion>
-  <JavaArchitecture>64</JavaArchitecture>
-  <JavaDownloadFile>jre-8u144-windows-x64.exe</JavaDownloadFile>
+  <JavaArchitecture>x64</JavaArchitecture>
+  <JavaDownloadFile>jre-8u251-windows-x64.exe</JavaDownloadFile>
   <JavaArguments>-Xmx1536M -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:-UseAdaptiveSizePolicy -Xmn128M</JavaArguments>
-  <MinecraftVersion>1.12.1</MinecraftVersion>
+  <MinecraftVersion>1.12.2</MinecraftVersion>
   <MinecraftDownloadFile>Minecraft Launcher.exe</MinecraftDownloadFile>
-  <ForgeVersion>1.12.1-forge1.12.1-14.22.1.2478</ForgeVersion>
-  <ForgeDownloadFile>forge-1.12.1-14.22.1.2478-installer.jar</ForgeDownloadFile>
+  <MinecraftMode>Forge</MinecraftMode>
+  <ForgeVersion>1.12.2-forge-14.23.5.2854</ForgeVersion>
+  <ForgeDownloadFile>forge-1.12.2-14.23.5.2854-installer.jar</ForgeDownloadFile>
   <SyncFolders>mods,resourcepacks,shaderpacks,config,cachedImages/skins</SyncFolders>
   <SyncAllowUpload>true</SyncAllowUpload>
   <ServerName>My Minecraft Server</ServerName>
@@ -106,7 +136,21 @@ It is also possible to hard-code the values in Settings.cs. These are overwritte
 
 **FTP server**
 
-The FTP server should contain the files referenced to in modsync.xml, the config file itself, and the directories to keep in sync. For the settings listed above the file structure would be:
+Modsync will ask for FTP connection details on the first run. It is also possible to hard-code the values in Settings.cs.
+The FTP server should contain the files referenced to in modsync.xml, the config file itself, and the directories to keep in sync.
+
+Example files for Fabric:
+
+```
+mods/
+modsync.exe
+modsync.xml
+OpenJDK17U-jre_x64_windows_hotspot_17.0.1_12.msi
+MinecraftLauncher.exe
+fabric-loader-0.12.12-1.18.1.json
+```
+
+Example files for Forge:
 
 ```
 config/
@@ -126,7 +170,7 @@ Write access is only needed for the command line option “updateserver” to wo
 **Rebuilding**
 
 To rebuild modsync:
-- Install Microsoft Visual Studio, version [2008 sp1](http://download.microsoft.com/download/E/8/E/E8EEB394-7F42-4963-A2D8-29559B738298/VS2008ExpressWithSP1ENUX1504728.iso) or newer.
+- Install Microsoft Visual Studio Express 2015 for Windows Desktop or newer.
 - Open the project by clicking modsync.csproj
 - Rebuilding requires [edtFTPnet](https://enterprisedt.com/products/edtftpnet/) from EnterpriseDT. To fix the missing reference to edtFTPnet.dll, download the zip and copy the edtFTPnet.dll from the bin folder to the modsync project folder
 - Click Build, Build solution
@@ -135,8 +179,7 @@ To rebuild modsync:
 **Download**
 
 Download the binary from [here](https://github.com/hupster/modsync/blob/master/bin/Release/modsync.exe?raw=true).
-The application requires [.NET 3.5 SP1](https://www.microsoft.com/en-us/download/details.aspx?id=22) to run.
-Modsync will ask for FTP connection details on the first run.
+The application requires the .NET framework 4 to run and has no further requirements.
 
 **Disclaimer**
 
